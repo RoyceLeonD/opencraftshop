@@ -7,14 +7,17 @@
   <img src="https://img.shields.io/badge/OpenSCAD-2021.01+-orange.svg" alt="OpenSCAD">
 </p>
 
-I can't cut straight. This generates woodworking plans so I don't waste as much lumber.
+I can't measure. This turns "I want a bookshelf" into an actual shopping list and plan.
 
-## What It Does
+## What It Actually Does
 
-- Generates cut lists and 3D models for basic furniture
-- Optimizes material usage (because wood is expensive)
-- Works for workbenches, storage benches, bed frames, bookshelves
-- Terminal-based. No fancy UI.
+- **Generates bills of materials** - Tells you exactly what to buy at the lumber yard
+- **Creates parametric designs** - Change dimensions, get new plans instantly  
+- **Produces cut lists** - Which boards to cut and how (optimization is just a bonus)
+- **Makes 3D models** - So you can see what you're building before you screw it up
+- **Calculates costs** - Know how much money you're about to waste
+
+The real value: It does the thinking so you can focus on the building (and subsequent fixing).
 
 ## Quick Start
 

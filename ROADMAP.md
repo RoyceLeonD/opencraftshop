@@ -1,35 +1,70 @@
-# Roadmap
+# Roadmap - Where We're Going (Help Wanted!)
 
-## Current State (v0.1.0)
-- 4 hardcoded furniture templates
-- Basic cut optimization 
-- Works with Docker
+Look, the real value here isn't the cutting - it's turning "I want a shelf" into an actual plan with a shopping list. The BOM generation and design parameterization is where the magic happens. Everything else is just math.
 
-## Next: Make it Not Suck (v0.2.0)
-- [ ] **Template-agnostic design** - Upload any OpenSCAD file, get cuts
-- [ ] **AI-powered dimension extraction** - Let AI figure out what needs cutting
-- [ ] **Metric support** - Because America is weird
-- [ ] **Save/load designs** - For iterating on failures
+## Current State (v0.1.0) - May 2025
+- 4 furniture templates (they work!)
+- BOM generator that actually tells you what to buy
+- Cut optimizer (because wood is expensive)
+- Parametric designs (change dimensions, get new plans)
 
-## The AI Stuff (v0.3.0)
-- [ ] **Natural language to furniture** - "I need a shelf 5 feet tall"
-- [ ] **Design validation** - AI tells you why it won't work before you cut
-- [ ] **Material optimization AI** - Smarter than FFD algorithm
-- [ ] **Mistake prediction** - "This will wobble because..."
+## Summer 2025 (v0.2.0) - What I'm Working On
+- [ ] **Better BOM generation** - More accurate material estimates
+- [ ] **Template-agnostic design** - Drop in ANY OpenSCAD file
+- [ ] **"I have this wood already" mode** - Work with what you've got
+- [ ] **Metric support** - For the 95% of the world that's sane
+- [ ] **Project memory** - Save designs, iterate, learn from mistakes
 
-## Maybe Eventually
-- [ ] Remove furniture types completely - just parse any OpenSCAD
-- [ ] AI-generated OpenSCAD from sketches/photos
-- [ ] Integration with GPT-4 vision for "build this" from images
-- [ ] Learn from cut failures to improve predictions
+**Please help with this stuff. I'm drowning.**
 
-## Not Happening
-- Social features
-- VR/AR nonsense  
-- "Community templates"
-- Anything that requires me to maintain a server
+## Fall 2025 (v0.3.0) - The AI Dreams
+- [ ] **Natural language to BOM** - "I need a desk for my closet"
+- [ ] **Photo to furniture** - "Build me this" *shows Pinterest*
+- [ ] **Smart material suggestions** - "Use plywood here, it's cheaper"
+- [ ] **Failure prediction** - "This will definitely fall apart because..."
+- [ ] **OpenSCAD generation** - AI writes the design files
 
-## Contributing
-Open a PR if you want. Or fork it. I don't care.
+**If you know AI/ML, PLEASE help. I watched one YouTube video and I'm lost.**
 
-The goal: Make it work with ANY design, not just my 4 templates.
+## 2026 - The Holy Grail
+- [ ] Parse hand-drawn sketches into cut lists
+- [ ] "Fix my design" button that actually works
+- [ ] Integration with local lumber yard inventory
+- [ ] Cost optimization across different materials
+- [ ] Structural analysis (will it hold books or collapse?)
+
+## What We Really Need Help With
+
+### Easy Stuff (Perfect for First PRs!)
+- Fix my terrible spelling in docs
+- Add your favorite furniture design
+- Test on Windows (does it even work?)
+- Add comments to the code (I forgot what half of it does)
+
+### Medium Stuff (You Probably Know More Than Me)
+- OpenSCAD parser to extract dimensions automatically
+- Better optimization algorithm (FFD is so 1970s)
+- Web interface (I tried, I failed, help)
+- Database for saving projects
+
+### Hard Stuff (You're Definitely Smarter Than Me)
+- ML model for material usage prediction
+- Computer vision for sketch → design
+- Structural analysis integration
+- Real-time collaboration (Google Docs for furniture?)
+
+## Why This Matters
+
+Every time someone:
+- Doesn't waste wood = 🌳 happy tree
+- Builds something that doesn't wobble = 😊 happy human  
+- Saves money on lumber = 💰 happy wallet
+- Makes furniture from a parametric design = 🤖 happy future
+
+## The Philosophy
+
+Keep it simple. Make it work. The bar is low (limbo low). If your code runs and doesn't delete anyone's files, it's better than what we have.
+
+Remember: Behind every feature request is someone who just wants to build something without measuring five times and still cutting wrong.
+
+**Seriously, please help. Open an issue. Submit a PR. Fix my bugs. Add features. Make it better. I'm just one person who can't measure straight.**

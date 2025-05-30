@@ -1,74 +1,175 @@
-# Contributing
+# Contributing - Please Help!
 
-Look, I made this for myself but I guess you can help if you want.
+I built this because I can't measure. Seriously, any help is appreciated.
 
-## Getting Started
+## The Bar is Low (Limbo Low)
 
-1. Fork the repo
-2. Clone your fork
-3. Make a branch: `git checkout -b whatever`
-4. Change stuff
-5. Test it: `make test`
-6. Push it
-7. Open a PR
+Can you:
 
-If it breaks, fix it. If you can't, at least tell me what broke.
+- Read Python? You're qualified! Can't read python? Also Qualified. Seriously, just chatgpt your way though this.
+- Run `make test` without crying? You're hired!
+- Explain what you changed? You're a hero!
+- Actually build furniture? Please teach me!
 
-## What You Can Add
+## What I Really Need Help With
 
-### New Furniture
-Stick a new template in `src/templates/`. Copy an existing one. Change it until it looks right. Add the config to `config/furniture_dimensions.json`.
+### 🆘 SOS - Currently Failing At These
 
-### Bug Fixes
-Found something broken? Fix it or file an issue. Be specific. "It doesn't work" tells me nothing.
+- **Better BOM generation** - The math is probably wrong
+- **OpenSCAD parser** - Need to extract dimensions from ANY .scad file
+- **Web interface** - I tried, I failed, I gave up
+- **Tests that test things** - Current tests are... optimistic
+- **Windows support** - Does it even work? No clue!
 
-### Better Algorithms
-The optimization in `src/optimize_cuts.py` works but could be better. Have at it.
+### 🎯 Would Make My Life Better
+
+- **More furniture templates** - Got a design? Share it!
+- **Metric support** - For the sane 95% of the world
+- **"I have this wood already" mode** - Optimize for existing materials
+- **Better error messages** - Current ones are useless
+- **Documentation** - Explain what I did because I forgot
+
+### 🚀 Dream Features (Help Me Dream)
+
+- AI that turns sketches into cut lists
+- "Will this wobble?" predictor
+- Natural language: "I need a shelf for this corner"
+- Integration with lumber yard inventory
+
+## How to Contribute (It's Easy, I Promise)
+
+### First Time? Start Here:
+
+1. Find a typo? Fix it! (There are many)
+2. Confused by something? Add a comment!
+3. Built something? Add the template!
+4. Found a bug? You probably did!
+
+### For the Brave:
+
+1. Pick something from the SOS list
+2. Try to understand my code (sorry)
+3. Make it less bad
+4. Submit a PR
+5. I'll love you forever
+
+## Development Setup
+
+```bash
+# Clone your fork
+git clone https://github.com/yourusername/opencraftshop.git
+cd opencraftshop
+
+# Make a branch (name it anything)
+git checkout -b fix-the-thing-that-broke
+
+# Set up environment
+make dev-setup  # Or just `pip install -r requirements.txt`
+
+# Make changes, test them
+make test  # Fingers crossed
+python src/main.py --type bookshelf  # Manual test
+
+# Submit PR
+git push origin fix-the-thing-that-broke
+```
+
+## Code Guidelines (More Like Suggestions)
+
+**The Current State:**
+
+- Some files have types hints, some don't
+- Some have tests, most don't
+- Comments explain the confusing parts (everything)
+- It works on my machine™
+
+**What Would Be Nice:**
+
+- Type hints (Future me will thank you)
+- Tests (Any test > no test)
+- Comments on the weird stuff
+- Black formatter (or don't, I'm not picky)
+
+**Example of Acceptable Code:**
+
+```python
+def calculate_boards_needed(length: float, count: int) -> int:
+    """
+    Calculate how many boards to buy.
+
+    Add 20% because I'll definitely mess up at least one.
+    """
+    needed = length * count / 96  # 96" = 8ft board
+    return int(needed * 1.2) + 1  # The +1 is hope
+```
 
 ## Testing
 
 ```bash
-make test           # Run everything
-make quick-test     # Just check if it runs
-make validate       # Check output files exist
+# The prayer method:
+make test
+
+# What actually helps:
+make test-unit      # If you wrote unit tests (hero!)
+python src/main.py --type workbench  # Does it run?
+
+# The real test:
+Actually build the furniture and send pics!
 ```
 
-Tests fail sometimes. That's normal.
+## Pull Request Process
 
-## Code Style
+Your PR needs:
 
-- Python: Use Black formatter. I don't care about your preferences.
-- Comments: Write them. Future you will need them.
-- Variables: Name them what they are. `board_length` not `bl`.
+1. **A description** - What did you do and why?
+2. **To not break everything** - Run at least one test
+3. **Bonus points** - Update docs if you added features
 
-## Pull Requests
+Good PR example:
 
-1. Make sure tests pass
-2. Update docs if you changed how things work
-3. Describe what you did. One line is fine.
+```
+Fix bookshelf falling over bug
 
-Good PR titles:
-- "Add dining table template"
-- "Fix 30% wood waste bug"
-- "Add metric support"
+- Shelves were upside down in the BOM
+- Added test to catch this
+- Built one, it stands! (pic attached)
+```
 
-Bad PR titles:
-- "Update"
-- "Fix"
-- "Changes"
+## Questions? Stuck? Confused?
 
-## First Timer?
+- **Open an issue** - I'm confused too, we'll figure it out
+- **Bug?** - Probably my fault, let me know
+- **Feature idea?** - Yes! Tell me!
+- **Built something?** - SHOW ME PICTURES
 
-Look for `good first issue` labels. Usually simple stuff.
+## Why Your Help Matters
 
-## Questions?
+Every contribution helps someone:
 
-Open an issue. I'll answer when I can.
+- Build furniture that doesn't wobble
+- Save money on wood
+- Feel less dumb about measuring wrong
+- Actually finish a project
 
-## Code of Conduct
+We're not building rockets here. We're helping people build shelves. Every little bit helps.
 
-Don't be a jerk. We're all just trying to build furniture without wasting wood.
+## The Philosophy
+
+Perfect code < Working code < Code that helps someone build a bookshelf
+
+The woodworking community is all about helping each other. This is just that, but with more Python and less splinters.
+
+## Recognition
+
+Contributors get:
+
+- Your name in the contributors list
+- My eternal gratitude
+- The warm fuzzy feeling of helping fellow bad woodworkers
+- Bragging rights at parties (if you go to those kinds of parties)
 
 ---
 
-Built this because I suck at woodworking. Your code doesn't need to be perfect. Just better than measuring wrong.
+**Seriously, please help. Even fixing a typo helps. The bar is so low it's underground. Your code doesn't have to be perfect, it just has to be better than mine (not hard).**
+
+P.S. - If you understand GitHub Actions, PLEASE fix the CI/CD. It's 90% copy-pasted from Stack Overflow.
