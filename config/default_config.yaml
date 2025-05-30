@@ -1,0 +1,9 @@
+# Default configuration for workbench designer
+materials:
+  - plywood
+  - mdf
+  - pine
+
+dimensions:
+  units: mm
+  default_thickness: 18

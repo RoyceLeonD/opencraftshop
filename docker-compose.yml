@@ -1,0 +1,9 @@
+services:
+  opencraftshop:
+    build: .
+    container_name: opencraftshop
+    volumes:
+      - ./output:/app/output
+      - ./config:/app/config
+    environment:
+      - OPENSCAD_ARGS=--hardwarnings

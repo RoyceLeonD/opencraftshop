@@ -1,0 +1,144 @@
+#!/bin/bash
+# OpenCraftShop Prepare-commit-msg Hook
+# Validates code and appends results to commit message
+
+# Get the commit message file path
+COMMIT_MSG_FILE="$1"
+COMMIT_SOURCE="$2"
+SHA1="$3"
+
+# Only run for normal commits (not merges, squashes, etc.)
+if [ "$COMMIT_SOURCE" != "" ] && [ "$COMMIT_SOURCE" != "message" ]; then
+    exit 0
+fi
+
+# Colors for terminal output
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+echo "🔧 OpenCraftShop Validation"
+echo "=========================="
+
+# Function to validate Python files
+validate_python() {
+    local errors=0
+    local validated=0
+    
+    for py_file in $(find src -name "*.py" -type f 2>/dev/null); do
+        if python3 -m py_compile "$py_file" 2>/dev/null; then
+            ((validated++))
+        else
+            ((errors++))
+        fi
+    done
+    
+    if [ $errors -eq 0 ] && [ $validated -gt 0 ]; then
+        echo -e "${GREEN}✓${NC} Python validation: $validated files OK"
+        echo "✓ Python: $validated files validated" >> "$COMMIT_MSG_FILE.tmp"
+    elif [ $errors -gt 0 ]; then
+        echo -e "${RED}✗${NC} Python validation: $errors errors"
+        echo "✗ Python: $errors validation errors" >> "$COMMIT_MSG_FILE.tmp"
+        return 1
+    fi
+    
+    return 0
+}
+
+# Function to validate JSON files
+validate_json() {
+    local errors=0
+    local validated=0
+    
+    for json_file in config/*.json; do
+        if [ -f "$json_file" ] && python3 -m json.tool "$json_file" > /dev/null 2>&1; then
+            ((validated++))
+        else
+            ((errors++))
+        fi
+    done
+    
+    if [ $errors -eq 0 ] && [ $validated -gt 0 ]; then
+        echo -e "${GREEN}✓${NC} JSON validation: $validated files OK"
+        echo "✓ JSON: $validated configuration files validated" >> "$COMMIT_MSG_FILE.tmp"
+    elif [ $errors -gt 0 ]; then
+        echo -e "${RED}✗${NC} JSON validation: $errors errors"
+        echo "✗ JSON: $errors validation errors" >> "$COMMIT_MSG_FILE.tmp"
+        return 1
+    fi
+    
+    return 0
+}
+
+# Function to get code statistics
+get_code_stats() {
+    # Count lines of code
+    py_lines=$(find src -name "*.py" -exec wc -l {} + 2>/dev/null | tail -1 | awk '{print $1}' || echo "0")
+    scad_lines=$(find src -name "*.scad" -exec wc -l {} + 2>/dev/null | tail -1 | awk '{print $1}' || echo "0")
+    
+    # Count TODO/FIXME comments
+    todo_count=$(grep -r "TODO\|FIXME" src/ 2>/dev/null | wc -l || echo "0")
+    
+    # Get file counts
+    py_files=$(find src -name "*.py" -type f 2>/dev/null | wc -l)
+    scad_files=$(find src -name "*.scad" -type f 2>/dev/null | wc -l)
+    
+    echo -e "${BLUE}Code Statistics:${NC}"
+    echo "  Python: $py_files files, $py_lines lines"
+    echo "  OpenSCAD: $scad_files files, $scad_lines lines"
+    
+    # Add stats to commit message
+    echo "" >> "$COMMIT_MSG_FILE.tmp"
+    echo "Code Statistics:" >> "$COMMIT_MSG_FILE.tmp"
+    echo "- Python: $py_files files, $py_lines lines" >> "$COMMIT_MSG_FILE.tmp"
+    echo "- OpenSCAD: $scad_files files, $scad_lines lines" >> "$COMMIT_MSG_FILE.tmp"
+    
+    if [ "$todo_count" -gt 0 ]; then
+        echo "  TODOs: $todo_count"
+        echo "- TODO/FIXME: $todo_count comments" >> "$COMMIT_MSG_FILE.tmp"
+    fi
+}
+
+# Create temporary file for validation results
+TEMP_MSG=$(mktemp)
+cp "$COMMIT_MSG_FILE" "$TEMP_MSG"
+
+# Start building the new commit message
+cat "$TEMP_MSG" > "$COMMIT_MSG_FILE.tmp"
+echo "" >> "$COMMIT_MSG_FILE.tmp"
+echo "---" >> "$COMMIT_MSG_FILE.tmp"
+echo "Validation Report:" >> "$COMMIT_MSG_FILE.tmp"
+
+# Run validations
+python_ok=true
+json_ok=true
+
+validate_python || python_ok=false
+validate_json || json_ok=false
+get_code_stats
+
+# Check if validations passed
+if [ "$python_ok" = false ] || [ "$json_ok" = false ]; then
+    echo ""
+    echo -e "${RED}❌ Validation failed! Commit aborted.${NC}"
+    rm "$COMMIT_MSG_FILE.tmp"
+    rm "$TEMP_MSG"
+    exit 1
+fi
+
+# Add modified files summary
+modified_count=$(git diff --cached --name-only | wc -l)
+echo "" >> "$COMMIT_MSG_FILE.tmp"
+echo "Modified files: $modified_count" >> "$COMMIT_MSG_FILE.tmp"
+
+# Replace the original commit message file
+mv "$COMMIT_MSG_FILE.tmp" "$COMMIT_MSG_FILE"
+rm "$TEMP_MSG"
+
+echo ""
+echo -e "${GREEN}✅ All validations passed!${NC}"
+echo "Validation summary added to commit message."
+
+exit 0
