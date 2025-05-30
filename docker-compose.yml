@@ -7,3 +7,18 @@ services:
       - ./config:/app/config
     environment:
       - OPENSCAD_ARGS=--hardwarnings
+  
+  web:
+    build: .
+    container_name: opencraftshop-web
+    entrypoint: ["python3"]
+    command: ["/app/src/web_ui.py"]
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./output:/app/output
+      - ./config:/app/config
+      - ./src:/app/src
+    environment:
+      - OPENSCAD_ARGS=--hardwarnings
+      - FLASK_ENV=development

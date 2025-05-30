@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: opencraftshop-web-test
+    entrypoint: ["python3"]
+    command: ["/app/src/web_ui.py"]
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./output:/app/output
+    networks:
+      - test-network
+
+  puppeteer-test:
+    build:
+      context: .
+      dockerfile: test/Dockerfile.puppeteer
+    container_name: opencraftshop-puppeteer
+    depends_on:
+      - web
+    volumes:
+      - ./test/screenshots:/app/screenshots
+    networks:
+      - test-network
+    environment:
+      - NODE_ENV=test
+
+networks:
+  test-network:
+    driver: bridge

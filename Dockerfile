@@ -14,6 +14,7 @@ RUN pip3 install -r requirements.txt
 # Copy application code
 COPY src/ /app/src/
 COPY config/ /app/config/
+COPY tests/ /app/tests/
 WORKDIR /app
 
 # Set entrypoint

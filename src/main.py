@@ -261,19 +261,26 @@ shelf_thickness = "1x12";
     import shutil
     shutil.copy('src/lumber_lib.scad', f'{output_dir}/lumber_lib.scad')
     
-    # Generate STL
-    output_stl_name: str = f"{furniture_type}.stl"
-    try:
-        subprocess.run([
-            'openscad',
-            '-o', output_stl_name,
-            output_scad_name
-        ], check=True, capture_output=True, cwd=output_dir)
-        console.print(f"[green]✓ Generated {output_stl_name}[/green]")
-    except subprocess.CalledProcessError as e:
-        console.print(f"[red]OpenSCAD error: {e.stderr.decode()}[/red]")
-    except FileNotFoundError:
-        console.print("[yellow]OpenSCAD not found. Install from openscad.org[/yellow]")
+    # Generate STL files (both assembled and exploded views)
+    for view_mode, suffix in [("assembled", ""), ("exploded", "_exploded")]:
+        output_stl_name: str = f"{furniture_type}{suffix}.stl"
+        try:
+            # Create a temporary scad file with the view mode set
+            temp_scad_content = custom_scad.replace('view_mode = "assembled";', f'view_mode = "{view_mode}";')
+            temp_scad_name = f"{furniture_type}_custom_{view_mode}.scad"
+            with open(f"{output_dir}/{temp_scad_name}", 'w') as f:
+                f.write(temp_scad_content)
+            
+            subprocess.run([
+                'openscad',
+                '-o', output_stl_name,
+                temp_scad_name
+            ], check=True, capture_output=True, cwd=output_dir)
+            console.print(f"[green]✓ Generated {output_stl_name} ({view_mode} view)[/green]")
+        except subprocess.CalledProcessError as e:
+            console.print(f"[red]OpenSCAD error: {e.stderr.decode()}[/red]")
+        except FileNotFoundError:
+            console.print("[yellow]OpenSCAD not found. Install from openscad.org[/yellow]")
     
     # Terminal visualization
     if visualize:

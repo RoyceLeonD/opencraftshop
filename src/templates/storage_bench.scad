@@ -7,6 +7,9 @@ bench_width = 18;
 bench_height = 18;
 storage_depth = 14;
 
+// View mode: "assembled" or "exploded"
+view_mode = "assembled";
+
 // Module for bench frame
 module bench_frame(length, width, height) {
     // Corner posts (2x4)

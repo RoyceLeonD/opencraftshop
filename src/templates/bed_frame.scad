@@ -8,6 +8,9 @@ bed_height = 14;  // Standard bed frame height
 headboard_height = 36;
 mattress_support_slats = 13;  // Number of support slats
 
+// View mode: "assembled" or "exploded"
+view_mode = "assembled";
+
 // Module for bed rails (sides)
 module bed_rail(length) {
     lumber("2x10", length);

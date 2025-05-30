@@ -35,6 +35,25 @@ make storage-bench
 docker-compose run workbench-designer --type bookshelf --height 48 --width 24
 ```
 
+## Web UI (New!)
+
+For a visual design experience with real-time 3D preview:
+
+```bash
+# Start the web interface
+./examples/run_web_ui.sh
+
+# Or manually:
+docker-compose up -d web
+```
+
+Then open http://localhost:5000 in your browser. Features:
+- Interactive 3D model viewer
+- Dropdown furniture selection
+- Real-time dimension adjustments
+- Download generated files directly
+- No terminal ASCII art needed!
+
 ## Installation
 
 Requires:

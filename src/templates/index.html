@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenCraftShop - Furniture Designer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/STLLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+        .left-pane {
+            width: 300px;
+            background: white;
+            padding: 1.5rem;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+        .middle-pane {
+            flex: 1;
+            position: relative;
+            background: #e0e0e0;
+            min-width: 400px;
+        }
+        .right-pane {
+            width: 350px;
+            background: white;
+            padding: 1.5rem;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+        #canvas-container {
+            width: 100%;
+            height: 100%;
+        }
+        h1 {
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+        }
+        h2 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.9rem;
+        }
+        select, input[type="number"] {
+            width: 100%;
+            padding: 0.6rem;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+        select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        button {
+            width: 100%;
+            padding: 0.8rem;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .results {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid #eee;
+        }
+        .result-section {
+            margin-bottom: 1rem;
+            padding: 0.8rem;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .result-section h3 {
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+        .download-link {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.4rem 0.8rem;
+            background: #2196F3;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            transition: background 0.3s;
+        }
+        .download-link:hover {
+            background: #1976D2;
+        }
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.1rem;
+            color: #666;
+        }
+        .error {
+            color: #f44336;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #ffebee;
+            border-radius: 4px;
+        }
+        pre {
+            background: white;
+            padding: 0.8rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 0.8rem;
+            line-height: 1.4;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+        }
+        .viewer-controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .view-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toggle-switch label {
+            font-weight: 600;
+            margin: 0;
+        }
+        .toggle-switch input[type="checkbox"] {
+            width: auto;
+            cursor: pointer;
+        }
+        .toggle-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .cut-diagram {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            line-height: 1.2;
+            white-space: pre;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+        .pane-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .pane-header h2 {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="left-pane">
+            <h1>🔨 OpenCraftShop</h1>
+            
+            <form id="furniture-form">
+                <div class="form-group">
+                    <label for="furniture-type">Furniture Type</label>
+                    <select id="furniture-type" name="type">
+                        {% for key, value in furniture_types.items() %}
+                        <option value="{{ key }}">{{ value }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="length">Length (inches)</label>
+                    <input type="number" id="length" name="length" value="48" min="1" max="120" step="0.5">
+                </div>
+                
+                <div class="form-group">
+                    <label for="width">Width (inches)</label>
+                    <input type="number" id="width" name="width" value="24" min="1" max="120" step="0.5">
+                </div>
+                
+                <div class="form-group">
+                    <label for="height">Height (inches)</label>
+                    <input type="number" id="height" name="height" value="36" min="1" max="120" step="0.5">
+                </div>
+                
+                <button type="submit" id="generate-btn">Generate Design</button>
+            </form>
+            
+            <div id="error-message" class="error" style="display: none;"></div>
+            
+            <div id="results" class="results" style="display: none;">
+                <h2>📁 Generated Files</h2>
+                
+                <div class="result-section">
+                    <h3>3D Model</h3>
+                    <a id="stl-download" class="download-link" href="#" download>Download STL</a>
+                </div>
+                
+                <div id="cut-list-section" class="result-section">
+                    <h3>✂️ Cut List</h3>
+                    <pre id="cut-list-content"></pre>
+                    <a id="cut-list-download" class="download-link" href="#" download>Download</a>
+                </div>
+                
+                <div id="shopping-list-section" class="result-section">
+                    <h3>💸 Shopping List</h3>
+                    <pre id="shopping-list-content"></pre>
+                    <a id="shopping-list-download" class="download-link" href="#" download>Download</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="middle-pane">
+            <div id="canvas-container"></div>
+            <div class="loading" id="viewer-loading">Click "Generate Design" to start</div>
+            <div class="view-toggle" id="view-toggle" style="display: none;">
+                <div class="toggle-switch">
+                    <label>View Mode:</label>
+                    <input type="checkbox" id="exploded-toggle" onchange="toggleViewMode()">
+                    <span class="toggle-label" id="toggle-label">Assembled</span>
+                </div>
+            </div>
+            <div class="viewer-controls">
+                🖱️ Left click + drag to rotate | Scroll to zoom | Right click + drag to pan
+            </div>
+        </div>
+        
+        <div class="right-pane">
+            <div class="pane-header">
+                <h2>📐 Cut List & Visualization</h2>
+            </div>
+            <div id="cut-diagram-container">
+                <p style="color: #999; font-size: 0.9rem;">Generate a design to see cut diagrams</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let scene, camera, renderer, controls;
+        let currentModel = null;
+        let currentFiles = { assembled: null, exploded: null };
+        let isExplodedView = false;
+        let cutListData = null;
+        
+        // Default dimensions for each furniture type
+        const furnitureDefaults = {
+            'workbench': { length: 72, width: 24, height: 34 },
+            'storage_bench': { length: 48, width: 18, height: 18 },
+            'bed_frame': { length: 80, width: 60, height: 14 },
+            'bookshelf': { length: 36, width: 12, height: 72 }
+        };
+        
+        // Initialize Three.js
+        function initThreeJS() {
+            const container = document.getElementById('canvas-container');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            
+            // Scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xe0e0e0);
+            
+            // Camera
+            camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
+            camera.position.set(100, 100, 100);
+            
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(width, height);
+            renderer.shadowMap.enabled = true;
+            container.appendChild(renderer.domElement);
+            
+            // Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
+            directionalLight.position.set(50, 100, 50);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.camera.near = 1;
+            directionalLight.shadow.camera.far = 300;
+            directionalLight.shadow.camera.left = -100;
+            directionalLight.shadow.camera.right = 100;
+            directionalLight.shadow.camera.top = 100;
+            directionalLight.shadow.camera.bottom = -100;
+            scene.add(directionalLight);
+            
+            // Grid
+            const gridHelper = new THREE.GridHelper(200, 20);
+            scene.add(gridHelper);
+            
+            // Handle window resize
+            window.addEventListener('resize', onWindowResize);
+        }
+        
+        function onWindowResize() {
+            const container = document.getElementById('canvas-container');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        function loadSTL(filename) {
+            const loader = new THREE.STLLoader();
+            
+            // Remove existing model
+            if (currentModel) {
+                scene.remove(currentModel);
+            }
+            
+            loader.load(
+                `/api/download/${filename}`,
+                function (geometry) {
+                    const material = new THREE.MeshPhongMaterial({
+                        color: 0x8B4513,
+                        specular: 0x111111,
+                        shininess: 10
+                    });
+                    
+                    currentModel = new THREE.Mesh(geometry, material);
+                    currentModel.castShadow = true;
+                    currentModel.receiveShadow = true;
+                    
+                    // Center the model
+                    geometry.computeBoundingBox();
+                    const center = geometry.boundingBox.getCenter(new THREE.Vector3());
+                    currentModel.position.sub(center);
+                    
+                    // Scale if needed
+                    const box = geometry.boundingBox;
+                    const size = box.getSize(new THREE.Vector3());
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    if (maxDim > 100) {
+                        const scale = 100 / maxDim;
+                        currentModel.scale.set(scale, scale, scale);
+                    }
+                    
+                    scene.add(currentModel);
+                    
+                    // Adjust camera
+                    const distance = maxDim * 2;
+                    camera.position.set(distance, distance, distance);
+                    camera.lookAt(0, 0, 0);
+                    controls.target.set(0, 0, 0);
+                    
+                    document.getElementById('viewer-loading').style.display = 'none';
+                    document.getElementById('view-toggle').style.display = 'block';
+                },
+                function (xhr) {
+                    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+                },
+                function (error) {
+                    console.error('Error loading STL:', error);
+                    document.getElementById('viewer-loading').textContent = 'Error loading 3D model';
+                }
+            );
+        }
+        
+        function toggleViewMode() {
+            isExplodedView = !isExplodedView;
+            const toggleLabel = document.getElementById('toggle-label');
+            toggleLabel.textContent = isExplodedView ? 'Exploded' : 'Assembled';
+            
+            // Load the appropriate STL
+            const filename = isExplodedView ? currentFiles.exploded : currentFiles.assembled;
+            if (filename) {
+                loadSTL(filename);
+            }
+        }
+        
+        function generateAsciiCutDiagrams(cutListContent) {
+            // Parse the cut list to extract optimized cuts
+            const optimizedCuts = parseOptimizedCuts(cutListContent);
+            
+            let asciiOutput = '';
+            
+            for (const [lumberType, data] of Object.entries(optimizedCuts)) {
+                if (lumberType === 'summary') continue;
+                
+                asciiOutput += `${lumberType} Cuts:\n`;
+                asciiOutput += '─'.repeat(60) + '\n';
+                
+                const stocks = data.stocks || [];
+                
+                for (const stock of stocks) {
+                    const length = stock.length;
+                    const scale = 60; // characters for full length
+                    const scaleFactor = scale / length;
+                    
+                    asciiOutput += `\nStock #${stock.stock_number} (${length}" / ${stock.length_feet})\n`;
+                    asciiOutput += '├' + '─'.repeat(scale) + '┤\n';
+                    
+                    // Draw cuts
+                    let cutLine = '│';
+                    let labelLine = ' ';
+                    let pos = 0;
+                    
+                    for (const cut of stock.cuts) {
+                        const cutLength = cut[0];
+                        const label = cut[1] || '';
+                        const cutChars = Math.floor(cutLength * scaleFactor);
+                        
+                        cutLine += '█'.repeat(cutChars) + '│';
+                        
+                        // Center label
+                        const labelText = `${cutLength}"`;
+                        const padding = Math.floor((cutChars - labelText.length) / 2);
+                        labelLine += ' '.repeat(Math.max(0, padding)) + labelText + 
+                                    ' '.repeat(Math.max(0, cutChars - padding - labelText.length)) + ' ';
+                        
+                        pos += cutLength;
+                    }
+                    
+                    // Add waste
+                    const waste = length - pos;
+                    if (waste > 0) {
+                        const wasteChars = scale - cutLine.length + 1;
+                        cutLine += '░'.repeat(Math.max(0, wasteChars)) + '│';
+                        labelLine += ` waste: ${waste.toFixed(1)}"`;
+                    }
+                    
+                    asciiOutput += cutLine + '\n';
+                    asciiOutput += labelLine + '\n';
+                    
+                    // Add efficiency info
+                    asciiOutput += `Efficiency: ${stock.efficiency}% | Waste: ${stock.waste}"\n`;
+                }
+                
+                asciiOutput += `\nTotal ${lumberType} waste: ${data.total_waste}" | Cost: $${data.total_cost}\n\n`;
+            }
+            
+            return asciiOutput;
+        }
+        
+        function parseOptimizedCuts(cutListContent) {
+            const lines = cutListContent.split('\n');
+            const optimizedCuts = {};
+            let currentSection = null;
+            let currentStock = null;
+            
+            for (const line of lines) {
+                // Skip header lines
+                if (line.includes('OPTIMIZED CUT LIST') || line.includes('═')) continue;
+                
+                // Match table headers like "│ Stock # │ Length │ Cuts │ Waste │ Efficiency │"
+                if (line.includes('│ Stock #')) continue;
+                if (line.includes('├─') || line.includes('└─') || line.includes('┌─')) continue;
+                
+                // Match lumber type sections
+                const lumberMatch = line.match(/^(\d+x\d+) Cuts/);
+                if (lumberMatch) {
+                    currentSection = lumberMatch[1];
+                    optimizedCuts[currentSection] = {
+                        stocks: [],
+                        total_waste: 0,
+                        total_cost: 0
+                    };
+                    continue;
+                }
+                
+                // Match stock lines from table format
+                const stockMatch = line.match(/│\s*(\d+)\s*│\s*(\d+)"\s*\(([^)]+)\)\s*│\s*(.+?)\s*│\s*(\d+\.?\d*)"?\s*│\s*(\d+\.?\d*)%\s*│/);
+                if (stockMatch && currentSection) {
+                    const cuts = [];
+                    const cutsList = stockMatch[4].split('\n').map(c => c.trim()).filter(c => c);
+                    
+                    for (const cutStr of cutsList) {
+                        const cutMatch = cutStr.match(/(\d+(?:\.\d+)?)"(?:\s*-\s*(.+))?/);
+                        if (cutMatch) {
+                            cuts.push([parseFloat(cutMatch[1]), cutMatch[2] || '']);
+                        }
+                    }
+                    
+                    optimizedCuts[currentSection].stocks.push({
+                        stock_number: parseInt(stockMatch[1]),
+                        length: parseInt(stockMatch[2]),
+                        length_feet: stockMatch[3],
+                        cuts: cuts,
+                        waste: parseFloat(stockMatch[5]),
+                        efficiency: parseFloat(stockMatch[6])
+                    });
+                    continue;
+                }
+                
+                // Match total waste/cost lines
+                const totalMatch = line.match(/Total .+ waste:\s*(\d+\.?\d*)".*Cost:\s*\$(\d+\.?\d*)/);
+                if (totalMatch && currentSection) {
+                    optimizedCuts[currentSection].total_waste = parseFloat(totalMatch[1]);
+                    optimizedCuts[currentSection].total_cost = parseFloat(totalMatch[2]);
+                }
+            }
+            
+            return optimizedCuts;
+        }
+        
+        // Form submission
+        document.getElementById('furniture-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('generate-btn');
+            const errorDiv = document.getElementById('error-message');
+            const resultsDiv = document.getElementById('results');
+            const loadingDiv = document.getElementById('viewer-loading');
+            
+            btn.disabled = true;
+            btn.textContent = 'Generating...';
+            errorDiv.style.display = 'none';
+            loadingDiv.textContent = 'Generating design...';
+            loadingDiv.style.display = 'block';
+            
+            const formData = {
+                type: document.getElementById('furniture-type').value,
+                length: parseFloat(document.getElementById('length').value),
+                width: parseFloat(document.getElementById('width').value),
+                height: parseFloat(document.getElementById('height').value)
+            };
+            
+            try {
+                const response = await fetch('/api/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || 'Generation failed');
+                }
+                
+                // Update results
+                resultsDiv.style.display = 'block';
+                
+                // Store both STL files
+                currentFiles.assembled = data.files.stl_assembled;
+                currentFiles.exploded = data.files.stl_exploded;
+                
+                // Reset toggle
+                isExplodedView = false;
+                document.getElementById('exploded-toggle').checked = false;
+                document.getElementById('toggle-label').textContent = 'Assembled';
+                
+                // Update download links
+                if (data.files.stl_assembled) {
+                    document.getElementById('stl-download').href = `/api/download/${data.files.stl_assembled}`;
+                    loadSTL(data.files.stl_assembled);
+                }
+                
+                if (data.cut_list_content) {
+                    document.getElementById('cut-list-content').textContent = data.cut_list_content;
+                    document.getElementById('cut-list-download').href = `/api/download/${data.files.cut_list}`;
+                    
+                    // Generate ASCII cut diagrams
+                    const asciiDiagrams = generateAsciiCutDiagrams(data.cut_list_content);
+                    const container = document.getElementById('cut-diagram-container');
+                    container.innerHTML = '';
+                    
+                    const diagramDiv = document.createElement('div');
+                    diagramDiv.className = 'cut-diagram';
+                    diagramDiv.textContent = asciiDiagrams;
+                    container.appendChild(diagramDiv);
+                }
+                
+                if (data.shopping_list_content) {
+                    document.getElementById('shopping-list-content').textContent = data.shopping_list_content;
+                    document.getElementById('shopping-list-download').href = `/api/download/${data.files.shopping_list}`;
+                }
+                
+            } catch (error) {
+                errorDiv.textContent = error.message;
+                errorDiv.style.display = 'block';
+                loadingDiv.style.display = 'none';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Generate Design';
+            }
+        });
+        
+        // Update dimensions when furniture type changes
+        document.getElementById('furniture-type').addEventListener('change', function(e) {
+            const type = e.target.value;
+            const defaults = furnitureDefaults[type];
+            
+            if (defaults) {
+                document.getElementById('length').value = defaults.length;
+                document.getElementById('width').value = defaults.width;
+                document.getElementById('height').value = defaults.height;
+            }
+        });
+        
+        // Initialize on load
+        window.addEventListener('load', function() {
+            initThreeJS();
+            animate();
+            
+            // Set initial default values
+            const initialType = document.getElementById('furniture-type').value;
+            const defaults = furnitureDefaults[initialType];
+            if (defaults) {
+                document.getElementById('length').value = defaults.length;
+                document.getElementById('width').value = defaults.width;
+                document.getElementById('height').value = defaults.height;
+            }
+        });
+    </script>
+</body>
+</html>

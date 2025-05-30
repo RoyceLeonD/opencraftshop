@@ -48,6 +48,11 @@ help:
 	@echo "  make install-hooks - Install git pre-commit hooks"
 	@echo "  make clean         - Clean all generated files"
 	@echo "  make docs          - Generate documentation"
+	@echo ""
+	@echo "$(GREEN)Web UI:$(NC)"
+	@echo "  make web           - Start web interface (http://localhost:5000)"
+	@echo "  make web-stop      - Stop web interface"
+	@echo "  make web-logs      - View web interface logs"
 
 # Build Docker image
 build:
@@ -82,7 +87,7 @@ install-hooks:
 # Run all tests
 test: build
 	@echo "Running OpenCraftShop Test Suite..."
-	@./tests/run_tests.sh
+	@./tests/run_all_tests.sh
 
 # Run dimension tests
 test-dimensions: build
@@ -274,3 +279,36 @@ list-types:
 	@echo "  - bookshelf"
 	@echo ""
 	@echo "Usage: make <type> or docker-compose run opencraftshop --type <type>"
+
+# Web UI targets
+web: build
+	@echo "$(BLUE)Starting OpenCraftShop Web UI...$(NC)"
+	@docker-compose up -d web
+	@echo "$(GREEN)✓ Web UI is running at http://localhost:5000$(NC)"
+	@echo "$(YELLOW)To stop: make web-stop$(NC)"
+
+web-stop:
+	@echo "$(BLUE)Stopping Web UI...$(NC)"
+	@docker-compose stop web
+	@echo "$(GREEN)✓ Web UI stopped$(NC)"
+
+web-logs:
+	@echo "$(BLUE)Web UI logs (Ctrl+C to exit):$(NC)"
+	@docker-compose logs -f web
+
+web-restart: web-stop web
+	@echo "$(GREEN)✓ Web UI restarted$(NC)"
+
+# API tests
+test-api: web
+	@echo "$(BLUE)Running API tests...$(NC)"
+	@docker-compose run --rm --entrypoint python3 opencraftshop /app/tests/test_api.py
+
+# 3D model tests
+test-models: build
+	@echo "$(BLUE)Running 3D model tests...$(NC)"
+	@docker-compose run --rm --entrypoint python3 opencraftshop /app/tests/test_3d_models.py
+
+# Run all tests including web UI
+test-all: test-api test-models test-unit
+	@echo "$(GREEN)All tests complete!$(NC)"
