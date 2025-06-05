@@ -14,74 +14,48 @@ CORS(app)
 OUTPUT_DIR = Path("/app/output")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-FURNITURE_TYPES = {
-    "workbench": "Workbench",
-    "storage_bench": "Storage Bench", 
-    "bed_frame": "Bed Frame",
-    "bookshelf": "Bookshelf"
-}
-
 @app.route('/')
 def index():
-    return render_template('index.html', furniture_types=FURNITURE_TYPES)
+    return render_template('index.html')
 
-@app.route('/api/generate', methods=['POST'])
-def generate_furniture():
+@app.route('/api/generate_model', methods=['POST'])
+def generate_model():
     try:
         data = request.json
-        furniture_type = data.get('type', 'workbench')
-        dimensions = {
-            'length': float(data.get('length', 48)),
-            'width': float(data.get('width', 24)),
-            'height': float(data.get('height', 36))
-        }
+        if not data:
+            return jsonify({"error": "No data provided"}), 400
+
+        prompt = data.get('prompt')
         
-        # Run the main.py script to generate files
-        cmd = [
-            'python3', '/app/src/main.py',
-            '--type', furniture_type,
-            '--length', str(int(dimensions['length'])),
-            '--width', str(int(dimensions['width'])),
-            '--height', str(int(dimensions['height'])),
-            '--output-dir', str(OUTPUT_DIR),
-            '--no-visualize'
-        ]
+        if not prompt:
+            return jsonify({"error": "Missing prompt"}), 400
+
+        # Placeholder for model generation logic.
+        # This will be replaced with actual Shap-E integration later.
+        # For now, simulate creating a dummy file.
         
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        
-        if result.returncode != 0:
-            return jsonify({'error': f'Generation failed: {result.stderr}'}), 500
-        
-        # Read generated files
-        stl_assembled_path = OUTPUT_DIR / f"{furniture_type}.stl"
-        stl_exploded_path = OUTPUT_DIR / f"{furniture_type}_exploded.stl"
-        cut_list_path = OUTPUT_DIR / "cut_list.txt"
-        shopping_list_path = OUTPUT_DIR / "shopping_list.txt"
-        
+        # Create a unique ID for the request to manage outputs if needed
+        request_id = tempfile.NamedTemporaryFile().name.split('/')[-1] # Generate a unique name
+        model_filename = f"model_{request_id}.obj" # Example output filename
+        model_path = OUTPUT_DIR / model_filename
+
+        # Simulate file creation
+        with open(model_path, 'w') as f:
+            f.write(f"# Dummy OBJ file for prompt: {prompt}\nv 1.0 1.0 1.0\nv -1.0 -1.0 1.0\nv -1.0 1.0 -1.0\nf 1 2 3")
+
         response_data = {
             'success': True,
-            'furniture_type': furniture_type,
-            'dimensions': dimensions,
+            'message': 'Model generation initiated (placeholder).',
+            'prompt': prompt,
             'files': {
-                'stl_assembled': f"{furniture_type}.stl" if stl_assembled_path.exists() else None,
-                'stl_exploded': f"{furniture_type}_exploded.stl" if stl_exploded_path.exists() else None,
-                'cut_list': 'cut_list.txt' if cut_list_path.exists() else None,
-                'shopping_list': 'shopping_list.txt' if shopping_list_path.exists() else None
+                'model_file': model_filename  # Or 'stl_assembled' if the frontend expects that key
             }
         }
-        
-        # Read cut list and shopping list content
-        if cut_list_path.exists():
-            with open(cut_list_path, 'r') as f:
-                response_data['cut_list_content'] = f.read()
-        
-        if shopping_list_path.exists():
-            with open(shopping_list_path, 'r') as f:
-                response_data['shopping_list_content'] = f.read()
         
         return jsonify(response_data)
         
     except Exception as e:
+        app.logger.error(f"Error in generate_model: {str(e)}") # Add logging
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/download/<filename>')
